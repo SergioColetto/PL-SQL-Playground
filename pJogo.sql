@@ -1,18 +1,20 @@
 CREATE OR REPLACE PACKAGE pJogo AS
   --
-  PROCEDURE marcaGol (pinIdJogo     jogo.id_jogo%TYPE,
-                       pinIdJogador jogador.id_jogador%TYPE,
-                       pisContraSN  gol.contra%TYPE);
+  PROCEDURE marcaGol (pinIdJogo        jogo.id_jogo%TYPE,
+                       pinIdJogador    jogador.id_jogador%TYPE,
+                       pisContraSN     gol.contra%TYPE);
   --
-  PROCEDURE marcaCartao (pinIdJogo    jogo.id_jogo%type,
-                         pinIdJogador jogador.id_jogador%type,
-                         pinIdCartao  cartao.id_cartao%type);
+  PROCEDURE marcaCartao (pinIdJogo     jogo.id_jogo%type,
+                         pinIdJogador  jogador.id_jogador%type,
+                         pinIdCartao   cartao.id_cartao%type);
   --
-  PROCEDURE escalaJogador(pinJogo    jogo.id_jogo%TYPE,
-                          pinJogador jogador.id_jogador%TYPE);
+  PROCEDURE inserir (pinIdTimeA        time.id_time%TYPE,
+                     pinIdTimeB        time.id_time%TYPE);
   --
 END;
-------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+
 CREATE OR REPLACE PACKAGE BODY pJogo AS
 
   PROCEDURE marcaGol
@@ -89,7 +91,7 @@ CREATE OR REPLACE PACKAGE BODY pJogo AS
       DBMS_OUTPUT.PUT_LINE('Erro ao marcar gol. Erro:['|| SQLERRM ||'].');
       --
   END;
-------------------------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
   PROCEDURE marcaCartao
   (
     --
@@ -205,53 +207,57 @@ CREATE OR REPLACE PACKAGE BODY pJogo AS
       dbms_output.put_line('Erro ao marcar cartão. Erro:['|| SQLERRM ||'].');
       --
   end;
-------------------------------------------------------------------------------------------------------------
-  PROCEDURE escalaJogador(
+  ------------------------------------------------------------------------------
+  PROCEDURE inserir 
+  (
+    pinIdTimeA time.id_time%TYPE,
+    pinIdTimeB time.id_time%TYPE
+  )AS
     --
-    pinJogo IN jogo.id_jogo%TYPE,
-    pinJogador IN jogador.id_jogador%TYPE
-    --
-  ) AS
-    --
-    vnJogo NUMBER;
-    vnJogador NUMBER;
+    vnContTimeA NUMBER;
+    vnContTimeB NUMBER;
     --
   BEGIN
     --
-    SELECT COUNT(1)
-      INTO vnJogo
-      FROM jogo j
-     WHERE j.id_jogo = pinJogo;
+    IF vnContTimeA = vnContTimeB THEN
     --
-    SELECT COUNT(1)
-      INTO vnJogador
-      FROM jogador j
-     WHERE j.id_jogador = pinJogador;
+      DBMS_OUTPUT.PUT_LINE('TIME SAO IGUAIS.');
     --
-    IF vnJogo = 0 THEN
-      --
-      DBMS_OUTPUT.PUT_LINE('Código do Jogo Inválido');
-      --
-    ELSIF vnJogador = 0 THEN
-      --
-      DBMS_OUTPUT.PUT_LINE('Código do Jogador Inválido');
-      --
     ELSE
+    --
+      SELECT COUNT(1)
+        INTO vnContTimeA
+        FROM time t
+       WHERE t.ID_TIME = pinIdTimeA;
       --
-      INSERT INTO JOGO_JOGADOR (id_jogo_jogador, id_jogo, id_jogador)
-                        VALUES (seq_jogo_jogador.nextval, pinJogo, pinJogador);
-      --
-      DBMS_OUTPUT.PUT_LINE('Escalação salva com sucesso');
+      SELECT COUNT(1)
+        INTO vnContTimeB
+        FROM time t
+       WHERE t.ID_TIME = pinIdTimeB;
+       --
+      IF vnContTimeA = 0 THEN
+        --
+        DBMS_OUTPUT.PUT_LINE('TIME A N�O ENCONTRADO.');
+        --
+      ELSIF vnContTimeB = 0 THEN
+        --
+        DBMS_OUTPUT.PUT_LINE('TIME A N�O ENCONTRADO.');
+        --
+      ELSE
+        --
+        INSERT INTO jogo (ID_JOGO, ID_TIME_A, ID_TIME_B)
+                  VALUES (SEQ_JOGO.nextval, pinIdTimeA, pinIdTimeB);
+        --
+        DBMS_OUTPUT.PUT_LINE('JOGO INSERIDO COM SUCESSO.');
+        --
+      END IF;
       --
     END IF;
-    --
   EXCEPTION
-    WHEN DUP_VAL_ON_INDEX THEN
-      DBMS_OUTPUT.PUT_LINE('Escalação já realizada.');
-      --
     WHEN OTHERS THEN
-      DBMS_OUTPUT.PUT_LINE('Erro ao escalar jogador. ' || SQLERRM);
-      --
+    --
+    DBMS_OUTPUT.PUT_LINE('ERRO: OTHERS' || SQLERRM);
+    --
   END;
 
 END;

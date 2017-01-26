@@ -15,6 +15,8 @@ CREATE OR REPLACE PACKAGE pTecnico IS
   --
 END;
 
+--------------------------------------------------------------------------------
+
 CREATE OR REPLACE PACKAGE BODY pTecnico IS
 
   PROCEDURE inserir
@@ -85,7 +87,7 @@ CREATE OR REPLACE PACKAGE BODY pTecnico IS
     DBMS_OUTPUT.PUT_LINE('ERRO: OTHERS [' || SQLERRM || ']');
     --
   END;
-  ------------------------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
   PROCEDURE alterar
   (
     pinId                TECNICO.ID_TECNICO%TYPE,
@@ -156,7 +158,7 @@ CREATE OR REPLACE PACKAGE BODY pTecnico IS
     DBMS_OUTPUT.PUT_LINE('ERRO: OTHERS [' || SQLERRM || ']');
     --
   END;
-  ------------------------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
   PROCEDURE remover
   (
     --

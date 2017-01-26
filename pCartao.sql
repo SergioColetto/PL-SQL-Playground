@@ -11,6 +11,8 @@ CREATE OR REPLACE PACKAGE pCartao AS
 
 END pCartao;
 
+--------------------------------------------------------------------------------
+
 CREATE OR REPLACE PACKAGE BODY pCartao AS
 
   PROCEDURE inserir
@@ -53,7 +55,7 @@ CREATE OR REPLACE PACKAGE BODY pCartao AS
     WHEN OTHERS THEN
       DBMS_OUTPUT.PUT_LINE('Erro ao inserir cartão. ' || SQLERRM);
   END;
-  ---------------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
   PROCEDURE alterar
   (
     --
@@ -107,7 +109,7 @@ CREATE OR REPLACE PACKAGE BODY pCartao AS
     WHEN OTHERS THEN
       DBMS_OUTPUT.PUT_LINE('Erro ao atualizar cartão. ' || SQLERRM);
   END;
-  ---------------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
   PROCEDURE remover
   (
     --

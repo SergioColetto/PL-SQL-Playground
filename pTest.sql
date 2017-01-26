@@ -8,6 +8,8 @@ CREATE OR REPLACE PACKAGE pTest AS
 
 END;
 
+--------------------------------------------------------------------------------
+
 CREATE OR REPLACE PACKAGE BODY pTest AS
 
   PROCEDURE timeTest AS
@@ -73,7 +75,16 @@ CREATE OR REPLACE PACKAGE BODY pTest AS
     PJOGADOR.REMOVER(2);
     DBMS_OUTPUT.PUT_LINE('- 16 - nao existe id');
     PJOGADOR.REMOVER(90);
-    DBMS_OUTPUT.PUT_LINE('-------------------------------------------------------');
+    
+    DBMS_OUTPUT.PUT_LINE('- 01 - escalação ja realizada');
+    PJOGADOR.ESCALAJOGADOR(1,1);
+    DBMS_OUTPUT.PUT_LINE('- 02 - deve escalar normamente');
+    PJOGADOR.ESCALAJOGADOR(2,17);
+    DBMS_OUTPUT.PUT_LINE('- 03 - jogador invalido');
+    PJOGADOR.ESCALAJOGADOR(2,90);
+    DBMS_OUTPUT.PUT_LINE('- 04 - jogo invalido');
+    PJOGADOR.ESCALAJOGADOR(90,2);
+    DBMS_OUTPUT.PUT_LINE('---------------------------------------------------');
   END;
   -------------------------------------------------------
   PROCEDURE tecnicoTest AS
@@ -148,18 +159,35 @@ CREATE OR REPLACE PACKAGE BODY pTest AS
   -- test jogo
   -- SELECT * FROM jogo;
   BEGIN
-    DBMS_OUTPUT.PUT_LINE('- 01 - escalação ja realizada');
-    PJOGO.ESCALAJOGADOR(1,1);
-    DBMS_OUTPUT.PUT_LINE('- 02 - deve escalar normamente');
-    PJOGO.ESCALAJOGADOR(2,17);
-    DBMS_OUTPUT.PUT_LINE('- 03 - jogador invalido');
-    PJOGO.ESCALAJOGADOR(2,90);
-    DBMS_OUTPUT.PUT_LINE('- 04 - jogo invalido');
-    PJOGO.ESCALAJOGADOR(90,2);
-    DBMS_OUTPUT.PUT_LINE('-------------------------------------------------------');
+    DBMS_OUTPUT.PUT_LINE('- 01 - deve inserir jogo');
+    PJOGO.INSERIR(1,1);
+    DBMS_OUTPUT.PUT_LINE('- 02 - nao deve inserir jogo, time a nao existe');
+    PJOGO.INSERIR(90,1);
+    DBMS_OUTPUT.PUT_LINE('- 03 - deve inserir jogo, time b nao existe');
+    PJOGO.INSERIR(1,90);
+    DBMS_OUTPUT.PUT_LINE('- 04 - times sao iguais');
+    PJOGO.INSERIR(1,1);
+    --
+    DBMS_OUTPUT.PUT_LINE('- 05 - marcar gol certo');
+    PJOGO.MARCAGOL(1, 1, 'N');
+    DBMS_OUTPUT.PUT_LINE('- 06 - marcar gol contra');
+    PJOGO.MARCAGOL(1, 1, 'S');
+    DBMS_OUTPUT.PUT_LINE('- 07 - jogo nao existe');
+    PJOGO.MARCAGOL(90, 1, 'N');
+    DBMS_OUTPUT.PUT_LINE('- 08 - jogador nao existe');
+    PJOGO.MARCAGOL(1, 90, 'N');
+    DBMS_OUTPUT.PUT_LINE('- 09 - tipo de gol invalido');
+    PJOGO.MARCAGOL(1, 1, 'X');
+    --
+    DBMS_OUTPUT.PUT_LINE('- 10 - marca cartao amarelo');
+    PJOGO.MARCACARTAO(2, 1, 1);
+    DBMS_OUTPUT.PUT_LINE('- 11 - marca cartao vermelho');
+    PJOGO.MARCACARTAO(1, 2, 2);
+    DBMS_OUTPUT.PUT_LINE('- 12 - cartao nao existe');
+    PJOGO.MARCACARTAO(2, 1, 90);
+    DBMS_OUTPUT.PUT_LINE('- 13 - jogo nao existe');
+    PJOGO.MARCACARTAO(90, 1, 1);
+    DBMS_OUTPUT.PUT_LINE('- 14 - jogador nao exite');
+    PJOGO.MARCACARTAO(2, 90, 1);
   END;
 END;
-
-
-
-ROLLBACK;

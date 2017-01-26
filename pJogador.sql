@@ -13,7 +13,12 @@ CREATE OR REPLACE PACKAGE pJogador IS
   --
   PROCEDURE remover (pinId                jogador.id_jogador%TYPE);
   --
+  PROCEDURE escalaJogador(pinJogo    jogo.id_jogo%TYPE,
+                        pinJogador jogador.id_jogador%TYPE);
+  --
 END;
+
+--------------------------------------------------------------------------------
 
 CREATE OR REPLACE PACKAGE BODY pJogador IS
 
@@ -85,7 +90,7 @@ CREATE OR REPLACE PACKAGE BODY pJogador IS
     DBMS_OUTPUT.PUT_LINE('ERRO: OTHERS [' || SQLERRM || ']');
     --
   END;
-  ------------------------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
   PROCEDURE alterar
   (
     pinId                jogador.id_jogador%TYPE,
@@ -156,7 +161,7 @@ CREATE OR REPLACE PACKAGE BODY pJogador IS
     DBMS_OUTPUT.PUT_LINE('ERRO: OTHERS [' || SQLERRM || ']');
     --
   END;
-  ------------------------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
   PROCEDURE remover
   (
     --
@@ -193,5 +198,53 @@ CREATE OR REPLACE PACKAGE BODY pJogador IS
     DBMS_OUTPUT.PUT_LINE('ERRO: OTHERS' || SQLERRM);
     --
   END;
-  --
+  ------------------------------------------------------------------------------
+  PROCEDURE escalaJogador(
+    --
+    pinJogo IN jogo.id_jogo%TYPE,
+    pinJogador IN jogador.id_jogador%TYPE
+    --
+  ) AS
+    --
+    vnJogo NUMBER;
+    vnJogador NUMBER;
+    --
+  BEGIN
+    --
+    SELECT COUNT(1)
+      INTO vnJogo
+      FROM jogo j
+     WHERE j.id_jogo = pinJogo;
+    --
+    SELECT COUNT(1)
+      INTO vnJogador
+      FROM jogador j
+     WHERE j.id_jogador = pinJogador;
+    --
+    IF vnJogo = 0 THEN
+      --
+      DBMS_OUTPUT.PUT_LINE('Código do Jogo Inválido');
+      --
+    ELSIF vnJogador = 0 THEN
+      --
+      DBMS_OUTPUT.PUT_LINE('Código do Jogador Inválido');
+      --
+    ELSE
+      --
+      INSERT INTO JOGO_JOGADOR (id_jogo_jogador, id_jogo, id_jogador)
+                        VALUES (seq_jogo_jogador.nextval, pinJogo, pinJogador);
+      --
+      DBMS_OUTPUT.PUT_LINE('Escalação salva com sucesso');
+      --
+    END IF;
+    --
+  EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+      DBMS_OUTPUT.PUT_LINE('Escalação já realizada.');
+      --
+    WHEN OTHERS THEN
+      DBMS_OUTPUT.PUT_LINE('Erro ao escalar jogador. ' || SQLERRM);
+      --
+  END;
+
 END;
