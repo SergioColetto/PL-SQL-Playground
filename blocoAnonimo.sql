@@ -4,4 +4,5 @@ BEGIN
   PTEST.tecnicoTest;
   PTEST.timeTest;
   PTEST.jogoTest;
+  ROLLBACK;
 END;
