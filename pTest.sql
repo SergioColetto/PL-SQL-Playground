@@ -71,19 +71,17 @@ CREATE OR REPLACE PACKAGE BODY pTest AS
     DBMS_OUTPUT.PUT_LINE('- 14 - nao deixa alterar time inesistente');
     PJOGADOR.ALTERAR(1, 'MANE', '01-01-1989', 2000, 90);
 
-    DBMS_OUTPUT.PUT_LINE('- 15 - deve remover jogador');
-    PJOGADOR.REMOVER(2);
     DBMS_OUTPUT.PUT_LINE('- 16 - nao existe id');
     PJOGADOR.REMOVER(90);
     
     DBMS_OUTPUT.PUT_LINE('- 01 - escalação ja realizada');
-    PJOGADOR.ESCALAJOGADOR(1,1);
+    PJOGADOR.ESCALAR(1,1);
     DBMS_OUTPUT.PUT_LINE('- 02 - deve escalar normamente');
-    PJOGADOR.ESCALAJOGADOR(2,17);
+    PJOGADOR.ESCALAR(2,17);
     DBMS_OUTPUT.PUT_LINE('- 03 - jogador invalido');
-    PJOGADOR.ESCALAJOGADOR(2,90);
+    PJOGADOR.ESCALAR(2,90);
     DBMS_OUTPUT.PUT_LINE('- 04 - jogo invalido');
-    PJOGADOR.ESCALAJOGADOR(90,2);
+    PJOGADOR.ESCALAR(90,2);
     DBMS_OUTPUT.PUT_LINE('---------------------------------------------------');
   END;
   -------------------------------------------------------
@@ -130,29 +128,31 @@ CREATE OR REPLACE PACKAGE BODY pTest AS
   -- test cartao
   -- SELECT * FROM CARTAO;
   BEGIN
-    DBMS_OUTPUT.PUT_LINE('- 01 - deve inserir cartao');
+    --
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = deve inserir cartao');
     PCARTAO.INSERIR('AMARELO', 1);
-    DBMS_OUTPUT.PUT_LINE('- 02 - nao deixa inserir vazio');
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = nao deixa inserir descricao vazio');
     PCARTAO.INSERIR('', 1);
-    DBMS_OUTPUT.PUT_LINE('- 03 - nao deixa inserir nulo');
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = nao deixa inserir descricao nulo');
     PCARTAO.INSERIR(NULL, 1);
-    DBMS_OUTPUT.PUT_LINE('- 04 - nao deixa inserir qtde nulo');
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = nao deixa inserir qtde nulo');
     PCARTAO.INSERIR('VERMELHO', NULL);
-
-    DBMS_OUTPUT.PUT_LINE('- 05 - deve alterar cartao');
+    --
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = deve alterar cartao');
     PCARTAO.ALTERAR(2,'VERDE', 2);
-    DBMS_OUTPUT.PUT_LINE('- 06 - nao deve alterar com nome nulo');
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = nao deve alterar com nome nulo');
     PCARTAO.ALTERAR(2, NULL, 2);
-    DBMS_OUTPUT.PUT_LINE('- 07 - nao deve alterar com nome vazio');
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = nao deve alterar com nome vazio');
     PCARTAO.ALTERAR(2,'', 2);
-    DBMS_OUTPUT.PUT_LINE('- 08 - nao deve alterar com qtde nulo');
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = nao deve alterar com qtde nulo');
     PCARTAO.ALTERAR(2,'AZUL', NULL);
-
-    DBMS_OUTPUT.PUT_LINE('- 09 - deve remover time');
+    --
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = deve remover time');
     PCARTAO.REMOVER(2);
-    DBMS_OUTPUT.PUT_LINE('- 10 - nao existe id');
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = nao existe id');
     PCARTAO.REMOVER(90);
     DBMS_OUTPUT.PUT_LINE('-------------------------------------------------------');
+    --
   END;
   -------------------------------------------------------
   PROCEDURE jogoTest AS

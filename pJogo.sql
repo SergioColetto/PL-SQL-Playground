@@ -17,6 +17,21 @@ END;
 
 CREATE OR REPLACE PACKAGE BODY pJogo AS
 
+  PROCEDURE print
+  (
+    --
+    pisMensagem VARCHAR2
+    --
+  )AS
+  BEGIN
+    --
+    DBMS_OUTPUT.PUT_LINE('[pJogo] = ' || pisMensagem);
+    --
+  EXCEPTION
+    WHEN OTHERS THEN
+      DBMS_OUTPUT.PUT_LINE(SQLERRM);
+  END;
+
   PROCEDURE marcaGol
   (
     --
@@ -26,28 +41,20 @@ CREATE OR REPLACE PACKAGE BODY pJogo AS
     --
   ) AS
     --
-    vnCountJogo        NUMBER;
-    vnCountJogador     NUMBER;
-    vnIdJogoJogador    jogo_jogador.id_jogo_jogador%TYPE;
-    vsContraSNUpper    gol.contra%TYPE;
+    vbTemJogo        BOOLEAN;
+    vbTemJogador     BOOLEAN;
+    vnIdJogoJogador  jogo_jogador.id_jogo_jogador%TYPE;
+    vsContraSNUpper  gol.contra%TYPE;
    --
   BEGIN
     --
     vsContraSNUpper := UPPER(pisContraSN);
-    --
-    SELECT count(1)
-      INTO vnCountJogo
-      FROM jogo j
-     WHERE j.id_jogo = pinIdJogo;
-    --
-    SELECT COUNT(1)
-      INTO vnCountJogador
-      FROM jogador j
-     WHERE j.ID_JOGADOR = pinIdJogador;
+    vbTemJogo       := PVALIDACAO.VALIDARJOGOEXISTENTE(pinIdJogo);
+    vbTemJogador    := PVALIDACAO.VALIDARJOGADOREXISTENTE(pinIdJogador);
     --
     BEGIN
       --
-      IF (vnCountJogo > 0 AND vnCountJogador > 0) THEN
+      IF vbTemJogo AND vbTemJogador THEN
       --
         SELECT j.ID_JOGADOR
           INTO vnIdJogoJogador
@@ -58,37 +65,37 @@ CREATE OR REPLACE PACKAGE BODY pJogo AS
       END IF;
     --
   EXCEPTION
-    WHEN no_data_found THEN
+    WHEN NO_DATA_FOUND THEN
       --
-      DBMS_OUTPUT.PUT_LINE('Jogador não escalado para este jogo [pinIdJogador]!');
+      print('Jogador não escalado para este jogo [pinIdJogador]!');
       --
     END;
     --
-    IF vnCountJogo = 0 THEN
+    IF NOT vbTemJogo THEN
       --
-      DBMS_OUTPUT.PUT_LINE('Jogo não encontrado [pinIdJogo]!');
+      print('Jogo não encontrado [pinIdJogo]!');
       --
-    ELSIF vnCountJogador = 0 THEN
+    ELSIF NOT vbTemJogador THEN
       --
-      DBMS_OUTPUT.PUT_LINE('Jogador não encontrado [vnCountJogador]!');
+      print('Jogador não encontrado [vnCountJogador]!');
       --
-    ELSIF vsContraSNUpper not in ('S','N') then
+    ELSIF vsContraSNUpper NOT IN ('S','N') then
       --
-      DBMS_OUTPUT.PUT_LINE('Contra só aceira valores S ou N [pisContraSN]!');
+      print('Contra só aceira valores S ou N [pisContraSN]!');
       --
     ELSE
       --
       INSERT INTO gol(id_gol, id_jogo_jogador, contra)
       VALUES         (seq_gol.nextval, vnIdJogoJogador, vsContraSNUpper);
       --
-      DBMS_OUTPUT.PUT_LINE('Goooollll!');
+      print('Goooollll!');
       --
     END if;
     --
   EXCEPTION
     WHEN OTHERS THEN
       --
-      DBMS_OUTPUT.PUT_LINE('Erro ao marcar gol. Erro:['|| SQLERRM ||'].');
+      print('Erro ao marcar gol. Erro:['|| SQLERRM ||'].');
       --
   END;
   ------------------------------------------------------------------------------
@@ -99,156 +106,135 @@ CREATE OR REPLACE PACKAGE BODY pJogo AS
     pinIdJogador jogador.id_jogador%type,
     pinIdCartao  cartao.id_cartao%type
     --
-  ) as
+  ) AS
    --
-   vnCountJogo        number;
-   vnCountJogador     number;
-   vnCountCartao      number;
-   vnQtdeCartao       number;
-   vnCountQtdeCartao  number;
-   vnIdJogoJogador    jogo_jogador.id_jogo_jogador%type;
+   vbTemJogo         BOOLEAN;
+   vbTemJogador      BOOLEAN;
+   vbTemCartao       BOOLEAN;
+   vnQtdeCartao      NUMBER;
+   vnCountQtdeCartao NUMBER;
+   vnIdJogoJogador   jogo_jogador.id_jogo_jogador%type;
    --
-  begin
+  BEGIN
     --
-    select count(1)
-    into   vnCountJogo
-    from   jogo j
-    where  j.id_jogo = pinIdJogo;
+    vbTemJogo    := PVALIDACAO.VALIDARJOGOEXISTENTE(pinIdJogo);
+    vbTemJogador := PVALIDACAO.VALIDARJOGADOREXISTENTE(pinIdJogador);
+    vbTemCartao  := PVALIDACAO.VALIDARCARTAOEXISTENTE(pinIdCartao);
     --
-    select count(1)
-    into   vnCountJogador
-    from   jogador j
-    where  j.id_jogador = pinIdJogador;
-    --
-    select count(1)
-    into   vnCountCartao
-    from   cartao c
-    where  c.id_cartao = pinIdCartao;
-    --
-    begin
+    BEGIN
       --
-      if vnCountJogo > 0 and vnCountJogador > 0 then
+      IF vbTemJogo AND vbTemJogador THEN
       --
-        select j.id_jogador
-        into   vnIdJogoJogador
-        from   jogo_jogador j
-        where  j.id_jogador = pinIdJogador and
-               j.id_jogo    = pinIdJogo;
+      SELECT j.id_jogador
+        INTO vnIdJogoJogador
+        FROM jogo_jogador j
+       WHERE j.id_jogador = pinIdJogador AND
+             j.id_jogo    = pinIdJogo;
       --
-      end if;
+      END IF;
     --
-    exception
-      when no_data_found then
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
       --
-      dbms_output.put_line('Jogador não escalado para este jogo [pinIdJogador]!');
+      print('Jogador não escalado para este jogo [pinIdJogador]!');
+      --
+    END ;
+    --
+    BEGIN
+      --
+      IF vbTemCartao then
+      --
+        SELECT qtde
+        INTO   vnQtdeCartao
+        FROM   cartao c
+        WHERE  c.id_cartao = pinIdCartao;
+      --
+        SELECT count(1)
+        INTO   vnCountQtdeCartao
+        FROM   JOGO_JOGADOR_CARTAO jjc
+        WHERE  jjc.ID_JOGO_JOGADOR = vnIdJogoJogador AND
+               jjc.ID_CARTAO       = pinIdCartao;
+      --
+      END IF ;
+    --
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+      --
+      print('Jogador não escalado para este jogo [pinIdJogador]!');
       --
     end;
     --
-    begin
+    IF NOT vbTemJogo THEN
       --
-      if vnCountCartao > 0 then
+      print('Jogo não encontrado [pinIdJogo]!');
       --
-        select qtde
-        into   vnQtdeCartao
-        from   cartao c
-        where  c.id_cartao = pinIdCartao;
+    ELSIF NOT vbTemJogador THEN
       --
-      end if;
+      print('Jogador não encontrado [vnIdJogador]!');
       --
-      if vnCountCartao > 0 then
+    ELSIF NOT vbTemCartao THEN
       --
-        select count(1)
-        into   vnCountQtdeCartao
-        from   JOGO_JOGADOR_CARTAO jjc
-        where  jjc.ID_JOGO_JOGADOR = vnIdJogoJogador
-        and    jjc.ID_CARTAO       = pinIdCartao;
+      print('Cartão não encontrado [pinIdCartao]!');
       --
-      end if;
+    ELSIF vnIdJogoJogador = null THEN
+      --
+      print('Jogador não escalado!');
+      --
+    ELSIF vnCountQtdeCartao = vnQtdeCartao THEN
+      --
+      print('Limite de cartões marcados!');
+      --
+    ELSE
+      --
+      INSERT INTO JOGO_JOGADOR_CARTAO (ID_JOGO_JOGADOR_CARTAO, id_jogo_jogador, id_cartao)
+      VALUES (SEQ_JOGO_JOGADOR_CARTAO.nextval, vnIdJogoJogador, pinIdCartao);
+      --
+      print('Cartão registrado!');
+      --
+    END IF;
     --
-    exception
-      when no_data_found then
-      --
-      dbms_output.put_line('Jogador não escalado para este jogo [pinIdJogador]!');
-      --
-    end;
-    --
-    if vnCountJogo = 0 then
-      --
-      dbms_output.put_line('Jogo não encontrado [pinIdJogo]!');
-      --
-    elsif vnCountJogador = 0 then
-      --
-      dbms_output.put_line('Jogador não encontrado [vnIdJogador]!');
-      --
-    elsif vnCountCartao = 0 then
-      --
-      dbms_output.put_line('Cartão não encontrado [pinIdCartao]!');
-      --
-    elsif vnIdJogoJogador = null then
-      --
-      dbms_output.put_line('Jogador não escalado!');
-      --
-    elsif vnCountQtdeCartao = vnQtdeCartao then
-      --
-      dbms_output.put_line('Limite de cartões marcados!');
-      --
-    else
-      --
-      insert into JOGO_JOGADOR_CARTAO (ID_JOGO_JOGADOR_CARTAO, id_jogo_jogador, id_cartao)
-      values (SEQ_JOGO_JOGADOR_CARTAO.nextval, vnIdJogoJogador, pinIdCartao);
-      --
-      dbms_output.put_line('Cartão registrado!');
-      --
-    end if;
-    --
-  exception
-    when others then
-      --
-      dbms_output.put_line('Erro ao marcar cartão. Erro:['|| SQLERRM ||'].');
+  EXCEPTION
+    WHEN OTHERS THEN
+      print('Erro ao marcar cartão. Erro:['|| SQLERRM ||'].');
       --
   end;
   ------------------------------------------------------------------------------
   PROCEDURE inserir 
   (
+    --
     pinIdTimeA time.id_time%TYPE,
     pinIdTimeB time.id_time%TYPE
+    --
   )AS
     --
-    vnContTimeA NUMBER;
-    vnContTimeB NUMBER;
+    vbTemTimeA BOOLEAN;
+    vbtemTimeB BOOLEAN;
     --
   BEGIN
     --
-    IF vnContTimeA = vnContTimeB THEN
+    IF pinIdTimeA = pinIdTimeB THEN
     --
-      DBMS_OUTPUT.PUT_LINE('TIME SAO IGUAIS.');
+      print('TIME SAO IGUAIS.');
     --
     ELSE
     --
-      SELECT COUNT(1)
-        INTO vnContTimeA
-        FROM time t
-       WHERE t.ID_TIME = pinIdTimeA;
+      vbTemTimeA := PVALIDACAO.VALIDARTIMEEXISTENTE(pinIdTimeA);
+      vbtemTimeB := PVALIDACAO.VALIDARTIMEEXISTENTE(pinIdTimeB);
       --
-      SELECT COUNT(1)
-        INTO vnContTimeB
-        FROM time t
-       WHERE t.ID_TIME = pinIdTimeB;
-       --
-      IF vnContTimeA = 0 THEN
+      IF NOT vbTemTimeA THEN
         --
-        DBMS_OUTPUT.PUT_LINE('TIME A N�O ENCONTRADO.');
+        print('TIME A NAO ENCONTRADO.');
         --
-      ELSIF vnContTimeB = 0 THEN
+      ELSIF NOT vbtemTimeB THEN
         --
-        DBMS_OUTPUT.PUT_LINE('TIME A N�O ENCONTRADO.');
+        print('TIME A NAO ENCONTRADO.');
         --
       ELSE
         --
         INSERT INTO jogo (ID_JOGO, ID_TIME_A, ID_TIME_B)
                   VALUES (SEQ_JOGO.nextval, pinIdTimeA, pinIdTimeB);
         --
-        DBMS_OUTPUT.PUT_LINE('JOGO INSERIDO COM SUCESSO.');
+        print('JOGO INSERIDO COM SUCESSO.');
         --
       END IF;
       --
@@ -256,7 +242,7 @@ CREATE OR REPLACE PACKAGE BODY pJogo AS
   EXCEPTION
     WHEN OTHERS THEN
     --
-    DBMS_OUTPUT.PUT_LINE('ERRO: OTHERS' || SQLERRM);
+    print('ERRO: OTHERS' || SQLERRM);
     --
   END;
 

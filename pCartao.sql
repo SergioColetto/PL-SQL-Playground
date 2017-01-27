@@ -15,6 +15,21 @@ END pCartao;
 
 CREATE OR REPLACE PACKAGE BODY pCartao AS
 
+  PROCEDURE print
+  (
+    --
+    pisMensagem VARCHAR2
+    --
+  )AS
+  BEGIN
+    --
+    DBMS_OUTPUT.PUT_LINE('[pCartao] = ' || pisMensagem);
+    --
+  EXCEPTION
+    WHEN OTHERS THEN
+      DBMS_OUTPUT.PUT_LINE(SQLERRM);
+  END;
+
   PROCEDURE inserir
   (
     --
@@ -23,37 +38,28 @@ CREATE OR REPLACE PACKAGE BODY pCartao AS
     --
   ) AS
     --
-    --
   BEGIN
     --
-    IF pisDescricao IS null THEN
+    IF NOT PVALIDACAO.VALIDARCAMPOOBRIGATORIOSTRING(pisDescricao) THEN
       --
-      DBMS_OUTPUT.PUT_LINE('Não pode inserir descrição null');
+      print('Não pode inserir descrição null');
       --
-    ELSIF TRIM(pisDescricao) IS null THEN
+    ELSIF NOT PVALIDACAO.VALIDARCAMPOOBRIGATORIONUMBER(pinQtde) THEN
       --
-      DBMS_OUTPUT.PUT_LINE('Não pode inserir descrição vazia');
-      --
-    ELSIF pinQtde IS null THEN
-      --
-      DBMS_OUTPUT.PUT_LINE('Não pode inserir quantidade null');
-      --
-    ELSIF pinQtde <= 0 THEN
-      --
-      DBMS_OUTPUT.PUT_LINE('Não pode inserir quantidade menor ou igual a zero');
+      print('Não pode inserir quantidade null');
       --
     ELSE
       --
       INSERT INTO cartao (id_cartao, descricao, qtde)
                   VALUES (seq_cartao.nextval, pisDescricao, pinQtde);
       --
-      DBMS_OUTPUT.PUT_LINE('Cartão inserido com sucesso');
+      print('Cartão inserido com sucesso');
       --
     END IF;
     --
   EXCEPTION
     WHEN OTHERS THEN
-      DBMS_OUTPUT.PUT_LINE('Erro ao inserir cartão. ' || SQLERRM);
+      print('Erro ao inserir cartão. ' || SQLERRM);
   END;
   ------------------------------------------------------------------------------
   PROCEDURE alterar
@@ -65,34 +71,23 @@ CREATE OR REPLACE PACKAGE BODY pCartao AS
     --
   ) AS
     --
-    vnCountCartao NUMBER;
+    vbTemCartao BOOLEAN;
     --
   BEGIN
     --
-    SELECT COUNT(1)
-      INTO vnCountCartao
-      FROM cartao
-     WHERE id_cartao = pinIdCartao;
+    vbTemCartao := PVALIDACAO.VALIDARCARTAOEXISTENTE(pinIdCartao);
     --
-    IF vnCountCartao = 0 THEN
+    IF NOT vbTemCartao THEN
       --
-      DBMS_OUTPUT.PUT_LINE('Cartão inexistente');
+      print('Cartão inexistente');
       --
-    ELSIF pisDescricao IS null THEN
+    ELSIF NOT PVALIDACAO.VALIDARCAMPOOBRIGATORIOSTRING(pisDescricao) THEN
       --
-      DBMS_OUTPUT.PUT_LINE('Não pode inserir descrição null');
+      print('Não pode inserir descrição null');
       --
-    ELSIF TRIM(pisDescricao) IS null THEN
+    ELSIF NOT PVALIDACAO.VALIDARCAMPOOBRIGATORIONUMBER(pinQtde) THEN
       --
-      DBMS_OUTPUT.PUT_LINE('Não pode inserir descrição vazia');
-      --
-    ELSIF pinQtde IS null THEN
-      --
-      DBMS_OUTPUT.PUT_LINE('Não pode inserir quantidade null');
-      --
-    ELSIF pinQtde <= 0 THEN
-      --
-      DBMS_OUTPUT.PUT_LINE('Não pode inserir quantidade menor ou igual a zero');
+      print('Não pode inserir quantidade null');
       --
     ELSE
       --
@@ -101,13 +96,13 @@ CREATE OR REPLACE PACKAGE BODY pCartao AS
                   c.qtde = pinQtde
        WHERE c.id_cartao = pinIdCartao;
       --
-      DBMS_OUTPUT.PUT_LINE('Cartão atualizado com sucesso');
+      print('Cartão atualizado com sucesso');
       --
     END IF;
     --
   EXCEPTION
     WHEN OTHERS THEN
-      DBMS_OUTPUT.PUT_LINE('Erro ao atualizar cartão. ' || SQLERRM);
+      print('Erro ao atualizar cartão. ' || SQLERRM);
   END;
   ------------------------------------------------------------------------------
   PROCEDURE remover
@@ -117,30 +112,27 @@ CREATE OR REPLACE PACKAGE BODY pCartao AS
     --
   )AS
     --
-    vnCountCartao NUMBER;
+    vbTemCartao BOOLEAN;
     --
   BEGIN
     --
-    SELECT COUNT(1)
-      INTO vnCountCartao
-      FROM cartao c
-     WHERE c.id_cartao = pinIdCartao;
+    vbTemCartao := PVALIDACAO.VALIDARCARTAOEXISTENTE(pinIdCartao);
     --
-    IF vnCountCartao = 0 THEN
+    IF NOT vbTemCartao THEN
       --
-      DBMS_OUTPUT.PUT_LINE('Cartão inexistente');
+      print('Cartão inexistente');
       --
     ELSE
       --
       DELETE cartao c
        WHERE c.id_cartao = pinIdCartao;
       --
-      DBMS_OUTPUT.PUT_LINE('Cartão excluído com sucesso');
+      print('Cartão excluído com sucesso');
       --
     END IF;
   EXCEPTION
     WHEN OTHERS THEN
-      DBMS_OUTPUT.PUT_LINE('Erro ao excluir cartão. ' || SQLERRM);
+      print('Erro ao excluir cartão. ' || SQLERRM);
   END;
 
-END pCartao;
+END;
